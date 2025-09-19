@@ -24,3 +24,34 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@layer base {
+  :root {
+    --grey: #282828;       /* grey */
+    --color-brand-light: #8BB174; /* lighter */
+    --color-brand-dark: #1e40af;  /* darker */
+  }
+}
+
+@font-face {
+  font-family: "Aspekta";
+  src: url("../../public/fonts/Aspekta/Aspekta-400.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Aspekta";
+  src: url("../../public/fonts/Aspekta/Aspekta-600.ttf") format("truetype");
+  font-weight: 700;
+  font-style: bold;
+}
+
+@layer base {
+  body {
+    font-family: "Aspekta", sans-serif;
+  }
+}
+html {
+  scroll-behavior: smooth; /* enables smooth behavior for hash navigation too */
+}
