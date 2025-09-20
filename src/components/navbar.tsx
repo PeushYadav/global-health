@@ -20,6 +20,7 @@ export default function Navbar() {
             height={40}
             priority
           />
+          <p className=" text-4xl hidden lg:block text-black"><span className='font-bold'>Med</span>Track</p>
         </div>
 
         {/* Center - Nav Links (Desktop only) */}

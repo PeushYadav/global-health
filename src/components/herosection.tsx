@@ -5,7 +5,7 @@ const HeroSection = () => {
   return (
     <div className="max-w-7xl mx-auto 2xl:max-w-full overflow-hidden px-2 md:px-20 py-0 my-5 h-auto sm:h-auto grid grid-cols-1 2xl:grid-cols-[2fr_1fr] gap-8 text-black font-[aspekta] ">
       {/* First column (image + text) */}
-      <div className="relative 2xl:col-start-1 h-[450px] lg:h-[700px] flex items-center">
+      <div className="relative 2xl:col-start-1 h-[450px] lg:h-[700px] flex items-center justify-center md:justify-start">
         {/* Background image with fixed size */}
         <img
           src="/girl-phone-right.svg"
@@ -14,17 +14,17 @@ const HeroSection = () => {
         />
 
         {/* Foreground content */}
-        <div className="relative z-10 flex flex-col justify-center items-start mt-0">
-          <div className="flex justify-start items-center mb-4">
+        <div className="relative z-10 flex flex-col justify-center items-center md:items-start text-center md:text-left mt-0">
+          <div className="flex justify-center md:justify-start items-center mb-4">
             <Tag />
           </div>
-          <p className=" text-4xl lg:text-8xl text-black"><span className='font-bold'>Med</span>Track</p>
-          <p className="mt-4 text-sm md:text-lg text-gray-700 w-[300px] max-w-md">
+          <p className=" text-8xl text-black"><span className='font-bold'>Med</span>Track</p>
+          <p className="mt-4 text-lg text-gray-700 w-full md:w-[300px] max-w-md">
             Revolutionize chronic disease management with AI-powered health
             tracking.
           </p>
 
-          <div className="mt-6 flex gap-4">
+          <div className="mt-6 flex gap-4 justify-center md:justify-start">
             <button className="px-6 py-2 rounded-full bg-teal-200 text-black font-medium hover:bg-teal-300">
               Login
             </button>

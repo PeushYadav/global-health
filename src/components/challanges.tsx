@@ -21,8 +21,8 @@ const challenges = [
 
 const Challenges: React.FC = () => {
   return (
-    <div className="w-screen flex justify-center items-center my-10 text-black">
-      <div className="relative w-[1750px] bg-gray-100 rounded-3xl shadow-xl p-10">
+    <div className="w-screen flex justify-center items-center my-10 text-black ">
+      <div className="relative w-[1750px] bg-gray-100 rounded-3xl shadow-xl p-10 mx-4">
         {/* Title */}
         <h2 className="text-5xl font-normal text-center mb-12">
           The <span className="font-bold">Challenge</span> of Chronic Illness
