@@ -5,6 +5,7 @@ import { User } from '@/models/User';
 import { verifyPassword } from '@/lib/bcrypt';
 import jwt from 'jsonwebtoken';
 import { DailyLog } from '@/models/DailyLog';
+import { LoginActivity } from '@/models/LoginActivity';
 
 const SECRET = 'dsjfbdshgfadskjgfkjadgsfgakjgehjbjsdbgafgeibasdbfjagyu4gkjb';
 
@@ -37,13 +38,27 @@ export async function POST(req: Request) {
       path: '/',
       maxAge: 60 * 60
     });
-const today = new Date();
-const localKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
-await DailyLog.updateOne(
-  { patient: user._id, date: localKey },
-  { $setOnInsert: { patient: user._id, date: localKey }, $addToSet: { medicationsTaken: 'login' } },
-  { upsert: true }
-);
+    // Track login activity for calendar display
+    const today = new Date();
+    const localKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    
+    // Record daily login activity
+    await LoginActivity.updateOne(
+      { user: user._id, date: localKey },
+      { 
+        $inc: { loginCount: 1 },
+        $set: { lastLoginTime: new Date() }
+      },
+      { upsert: true }
+    );
+
+    // Keep existing DailyLog tracking
+    await DailyLog.updateOne(
+      { patient: user._id, date: localKey },
+      { $setOnInsert: { patient: user._id, date: localKey }, $addToSet: { medicationsTaken: 'login' } },
+      { upsert: true }
+    );
+    
     return res;
   } catch (e: any) {
     return NextResponse.json({ message: 'Login failed', error: e?.message || 'Unknown' }, { status: 500 });

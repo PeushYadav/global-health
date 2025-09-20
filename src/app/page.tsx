@@ -1,5 +1,6 @@
 import Challanges from '@/components/challanges'
 import FinalCta from '@/components/finalcta'
+import Footer from '@/components/Footer'
 import HeroSection from '@/components/herosection'
 import Navbar from '@/components/navbar'
 import Solution from '@/components/solution'
@@ -14,7 +15,7 @@ const page = () => {
       <Challanges />
       <Solution />
       <FinalCta />
-            
+      <Footer />
     </div>
   )
 }

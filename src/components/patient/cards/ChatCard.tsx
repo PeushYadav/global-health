@@ -10,10 +10,13 @@ export default function ChatCard() {
   const [streak,setStreak]=useState(0);
 
   useEffect(()=>{(async()=>{
-    const l=await fetch('/api/patient/daily-log?range=30',{cache:'no-store'});
-    if(l.ok){ const data=await l.json(); const set=new Set(data.filter((d:any)=>d.taken).map((d:any)=>d.date)); let s=0; const c=new Date(); const y=(d:Date)=>d.toISOString().slice(0,10);
-      while(set.has(y(c))){ s+=1; c.setDate(c.getDate()-1); } setStreak(s);
+    // Calculate login streak instead of medication streak
+    const streakRes = await fetch('/api/patient/login-activity?type=streak', {cache:'no-store'});
+    if(streakRes.ok) { 
+      const streakData = await streakRes.json(); 
+      setStreak(streakData.streak || 0);
     }
+    
     const t=await fetch('/api/messages/threads',{cache:'no-store'}); if(t.ok) setThreads(await t.json());
   })();},[]);
 
@@ -27,7 +30,22 @@ export default function ChatCard() {
 
   return (
     <div className="rounded-2xl bg-white p-5 shadow-sm">
-      <div className="mb-2 text-center text-sm font-medium text-slate-700 bg-orange-100 rounded-md py-1">You are doing great with {streak} day streak!</div>
+      <div className={`mb-2 text-center text-sm font-medium rounded-md py-1 ${
+        streak === 0 
+          ? "text-slate-700 bg-slate-100"
+          : streak < 7 
+            ? "text-green-700 bg-green-100"
+            : streak < 30 
+              ? "text-blue-700 bg-blue-100"
+              : "text-purple-700 bg-purple-100"
+      }`}>
+        {streak === 0 
+          ? "Start your login streak today!" 
+          : streak === 1 
+            ? "Great start! You have a 1 day login streak!" 
+            : `You are doing great with ${streak} day login streak!`
+        }
+      </div>
       <div className="grid gap-4 md:grid-cols-12">
         <div className="md:col-span-4">
           <div className="mb-2 text-sm font-medium text-slate-800">Doctors</div>

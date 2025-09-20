@@ -4,6 +4,7 @@ import { connectDB } from '@/lib/db';
 import { User } from '@/models/User';
 import { hashPassword } from '@/lib/bcrypt';
 import { signToken } from '@/lib/jwt';
+import { LoginActivity } from '@/models/LoginActivity';
 
 export async function POST(req: Request) {
   try {
@@ -34,6 +35,18 @@ export async function POST(req: Request) {
     });
 
     const token = signToken({ sub: user._id.toString(), email: user.email, role: user.role });
+    
+    // Track login activity for new user registration
+    const today = new Date();
+    const localKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+    
+    await LoginActivity.create({
+      user: user._id,
+      date: localKey,
+      loginCount: 1,
+      lastLoginTime: new Date()
+    });
+    
     const res = NextResponse.json(
       { user: { id: user._id, name: user.name, email: user.email, role: user.role } },
       { status: 201 }
