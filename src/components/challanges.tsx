@@ -22,20 +22,20 @@ const challenges = [
 const Challenges: React.FC = () => {
   return (
     <div className="w-screen flex justify-center items-center my-10 text-black">
-      <div className="relative w-[1750px] h-[450px] bg-gray-100 rounded-3xl shadow-xl p-10">
+      <div className="relative w-[1750px] bg-gray-100 rounded-3xl shadow-xl p-10">
         {/* Title */}
         <h2 className="text-5xl font-normal text-center mb-12">
           The <span className="font-bold">Challenge</span> of Chronic Illness
         </h2>
 
         {/* Four Columns */}
-<div className="grid grid-cols-4 divide-x divide-gray-300 h-[250px]">
+<div className="flex flex-col lg:flex-row lg:divide-x lg:divide-gray-300 ">
   {challenges.map((item, index) => (
-    <div key={index} className="px-6 text-center flex flex-col justify-start">
-      <h3 className="inline-block px-4 py-1 mb-4 text-lg font-medium border border-gray-400 rounded-full">
+    <div key={index} className="px-6 mt-6 text-center flex flex-col justify-start">
+      <h3 className="inline-block px-4 py-1 mb-2 lg:mb-4 text-lg font-medium border w-fit border-gray-400 rounded-full">
         {item.title}
       </h3>
-      <p className="text-gray-700 text-sm leading-relaxed">{item.desc}</p>
+      <p className="text-gray-700 text-sm text-left leading-relaxed">{item.desc}</p>
     </div>
   ))}
 </div>
