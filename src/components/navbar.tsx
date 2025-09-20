@@ -4,12 +4,24 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Menu, X } from "lucide-react"; // icons
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const { authenticated, user, logout, loading } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    setIsOpen(false);
+  };
+
+  const getDashboardPath = () => {
+    if (!user) return "/patient";
+    return user.role === "doctor" ? "/doctor" : "/patient";
+  };
 
   return (
-    <nav className=" w-full bg-white/50 backdrop-blur-2xl text-black  ">
+    <nav className=" w-full bg-white backdrop-blur-2xl text-black  ">
       <div className="max-w-8xl mx-auto px-6 py-3 flex items-center justify-between">
         {/* Left - Logo */}
         <div className="flex items-center">
@@ -38,18 +50,37 @@ export default function Navbar() {
 
         {/* Right - Auth Buttons (Desktop only) */}
         <div className="hidden md:flex items-center space-x-2">
-          <Link
-            href="/login"
-            className="px-3 py-1 rounded-full bg-gray-200 hover:bg-gray-300"
-          >
-            Login
-          </Link>
-          <Link
-            href="/register"
-            className="px-3 py-1 rounded-full bg-black text-white hover:bg-gray-800"
-          >
-            Register
-          </Link>
+          {authenticated ? (
+            <>
+              <Link
+                href={getDashboardPath()}
+                className="px-3 py-1 rounded-full bg-gray-200 hover:bg-gray-300"
+              >
+                Dashboard
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="px-3 py-1 rounded-full bg-black text-white hover:bg-gray-800"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="px-3 py-1 rounded-full bg-gray-200 hover:bg-gray-300"
+              >
+                Login
+              </Link>
+              <Link
+                href="/register"
+                className="px-3 py-1 rounded-full bg-black text-white hover:bg-gray-800"
+              >
+                Register
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Hamburger (Mobile only) */}
@@ -86,20 +117,41 @@ export default function Navbar() {
             >
               Contact
             </Link>
-            <Link
-              href="/login"
-              className="px-4 py-2 rounded-full bg-gray-200 hover:bg-gray-300"
-              onClick={() => setIsOpen(false)}
-            >
-              Login
-            </Link>
-            <Link
-              href="/register"
-              className="px-4 py-2 rounded-full bg-black text-white hover:bg-gray-800"
-              onClick={() => setIsOpen(false)}
-            >
-              Register
-            </Link>
+            
+            {authenticated ? (
+              <>
+                <Link
+                  href={getDashboardPath()}
+                  className="px-4 py-2 rounded-full bg-gray-200 hover:bg-gray-300"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 rounded-full bg-black text-white hover:bg-gray-800"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="px-4 py-2 rounded-full bg-gray-200 hover:bg-gray-300"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-4 py-2 rounded-full bg-black text-white hover:bg-gray-800"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Register
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}
