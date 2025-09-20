@@ -5,6 +5,7 @@ import { jwtVerify } from 'jose';
 import { connectDB } from '@/lib/db';
 import { User } from '@/models/User';
 import { MedicalProfile } from '@/models/MedicalProfile';
+import { DailyLog } from '@/models/DailyLog';
 
 const SECRET = new TextEncoder().encode('dsjfbdshgfadskjgfkjadgsfgakjgehjbjsdbgafgeibasdbfjagyu4gkjb');
 
@@ -72,6 +73,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Doctor email required' }, { status: 400 });
     }
 
+    function localYMD(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+
     await MedicalProfile.create({
       user: uid,
       chronicDiseases: diseases,
@@ -80,7 +89,12 @@ export async function POST(req: NextRequest) {
       doctorOnPlatform,
       doctorEmail: String(doctorEmail || '').trim() || undefined
     });
-
+const today = localYMD(new Date());
+await DailyLog.updateOne(
+  { patient: uid, date: today },
+  { $setOnInsert: { patient: uid, date: today }, $addToSet: { medicationsTaken: 'intake' } },
+  { upsert: true }
+);
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (e: any) {
     return NextResponse.json(
