@@ -14,10 +14,13 @@ async function getDoctor() {
     return payload;
   } catch {
     redirect('/login');
-  }
+  } 
 }
 
 export default async function DoctorHome() {
   const user = await getDoctor();
-  return <div>Doctor dashboard for {String(user.email)}</div>;
+  return(
+    <div>Doctor dashboard for {String(user.email)}</div>
+    
+  );
 }
