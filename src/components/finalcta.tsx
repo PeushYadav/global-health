@@ -1,5 +1,7 @@
 // components/FinalCta.tsx
 import React from "react";
+import Link from "next/link";
+
 
 type Props = { className?: string };
 
@@ -22,31 +24,23 @@ export default function FinalCta({ className }: Props) {
             </p>
 
             <div className="mt-6 flex items-center justify-center gap-4">
-              <a
-                href="#login"
+              <Link
+                href="/login"
                 className="rounded-full bg-emerald-200/70 text-emerald-900 hover:bg-emerald-200 active:bg-emerald-300 transition-colors px-5 py-2 text-sm font-aspekta"
               >
                 Login
-              </a>
-              <a
-                href="#explore"
+              </Link>
+              <Link
+                href="/register"
                 className="rounded-full border border-neutral-300 bg-white text-neutral-800 hover:bg-neutral-50 active:bg-neutral-100 transition-colors px-5 py-2 text-sm font-aspekta"
               >
                 Explore
-              </a>
+              </Link>
             </div>
           </div>
         </div>
 
-        {/* Footer note */}
-        <footer className="mt-6 text-center font-aspekta">
-          <p className="text-[12px] text-neutral-600">
-            © 2025 MedTrack - Healthcare Impact Platform. Developed by students of AIT.
-          </p>
-          <p className="mt-1 text-[12px] text-neutral-600">
-            Empowering better health through technology.
-          </p>
-        </footer>
+        
       </div>
     </section>
   );

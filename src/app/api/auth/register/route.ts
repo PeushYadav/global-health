@@ -38,7 +38,15 @@ export async function POST(req: Request) {
       { user: { id: user._id, name: user.name, email: user.email, role: user.role } },
       { status: 201 }
     );
-    // cookie is set inside lib/jwt in previous code; alternatively set here if preferred
+    
+    // Set auth cookie
+    res.cookies.set('auth', token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false, // set true only under HTTPS
+      path: '/',
+      maxAge: 60 * 60
+    });
 
     return res;
   } catch (err: any) {

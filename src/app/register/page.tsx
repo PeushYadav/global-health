@@ -3,11 +3,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Navbar from '@/components/Navbar';
+import Navbar from '@/components/navbar';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function RegisterPage() {
   const router = useRouter();
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'patient' });
+  const { checkAuth } = useAuth();
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -28,6 +30,10 @@ export default function RegisterPage() {
 
     const data = await res.json();
     const role = data?.user?.role;
+    
+    // Refresh auth state after successful registration
+    await checkAuth();
+    
     router.push(role === 'doctor' ? '/doctor' : '/patient');
   }
 

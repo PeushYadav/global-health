@@ -20,10 +20,10 @@ export default function MedTrackHero({ className }: Props) {
       <div className="mx-auto flex max-w-[1600px] flex-nowrap items-center justify-between gap-8 px-4 sm:px-6">
         {/* Left: fixed-size card (size unchanged) */}
         <div >
-          <div className="rounded-3xl bg-gray-100 p-6 sm:p-8 md:p-10 shadow-xl  h-[730px] font-aspekta">
+          <div className="rounded-3xl bg-gray-100 p-6 sm:p-8 md:p-10 shadow-xl  h-[800px] sm:h-[715px] font-aspekta">
             {/* Center the content block; text remains left-aligned */}
             <div className="mx-auto flex h-full max-w-[980px] flex-col justify-center text-left">
-              <h2 className="text-[68px] sm:text-[72px] lg:text-[78px] leading-[1.02] tracking-[-0.012em] font-normal text-black">
+              <h2 className="text-[54px] sm:text-[68px] lg:text-[78px] leading-[1.02] tracking-[-0.012em] font-normal text-black">
                 Our Solution: <span className="font-bold">Med</span>
                 <span className="">Track</span>
               </h2>
