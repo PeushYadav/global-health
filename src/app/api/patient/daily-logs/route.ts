@@ -9,7 +9,8 @@ import { TZ, ymdLocal } from '@/utils/date';
 const SECRET = new TextEncoder().encode('dsjfbdshgfadskjgfkjadgsfgakjgehjbjsdbgafgeibasdbfjagyu4gkjb');
 
 async function getUid() {
-  const t = cookies().get('auth')?.value;
+  const cookieStore = await cookies();
+  const t = cookieStore.get('auth')?.value;
   if (!t) return null;
   try { const { payload } = await jwtVerify(t, SECRET); return String((payload as any).sub || ''); }
   catch { return null; }
@@ -28,13 +29,18 @@ export async function GET(req: NextRequest) {
   // Load all logs since start using the same local key space
   const startKey = ymdLocal(start);
   const logs = await DailyLog.find({ patient: uid, date: { $gte: startKey } }).lean();
-  const set = new Set<string>(logs.map((l: any) => l.date));
+  const logMap = new Map<string, any>();
+  logs.forEach((l: any) => {
+    logMap.set(l.date, l);
+  });
 
   const days = [];
   const cursor = new Date(start);
   for (let i = 0; i < range; i++) {
     const key = ymdLocal(cursor);
-    days.push({ date: key, taken: set.has(key) });
+    const log = logMap.get(key);
+    const hasMedications = log?.medicationsTaken && log.medicationsTaken.length > 0;
+    days.push({ date: key, taken: hasMedications });
     cursor.setDate(cursor.getDate() + 1);
   }
 

@@ -19,21 +19,28 @@ export default function CalendarCard() {
     setRefreshKey(prev => prev + 1);
   };
 
-  // Listen to custom event for appointment updates
+  // Listen to custom events for updates
   useEffect(() => {
     const handleAppointmentUpdate = () => {
       refreshCalendar();
     };
 
+    const handleMedicationTaken = () => {
+      refreshCalendar();
+    };
+
     window.addEventListener('appointmentBooked', handleAppointmentUpdate);
+    window.addEventListener('medicationTaken', handleMedicationTaken);
+    
     return () => {
       window.removeEventListener('appointmentBooked', handleAppointmentUpdate);
+      window.removeEventListener('medicationTaken', handleMedicationTaken);
     };
   }, []);
 
   useEffect(() => {
     (async () => {
-      const l = await fetch('/api/patient/daily-log?range=60', { cache: 'no-store' });
+      const l = await fetch('/api/patient/daily-logs?range=60', { cache: 'no-store' });
       if (l.ok) {
         const data = await l.json();
         // API returns server-computed local keys; keep as-is
