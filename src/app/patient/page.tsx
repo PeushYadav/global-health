@@ -21,7 +21,7 @@ async function getPatient() {
 
 export default async function PatientHome() {
   const user = await getPatient();
-  await connectDB();
+  await connectDB();  
   const exists = await MedicalProfile.exists({ user: user.sub });
 
   if (!exists) {

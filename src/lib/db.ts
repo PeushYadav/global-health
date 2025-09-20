@@ -2,7 +2,7 @@
 import mongoose from 'mongoose';
 
 // HARD-CODED for local dev only
-const MONGODB_URI = 'mongodb://127.0.0.1:27017/users';
+const MONGODB_URI = 'mongodb+srv://Shashwat:Rain7bow@cluster0.nxr1cz9.mongodb.net/users';
 
 if (!MONGODB_URI) {
   throw new Error('Missing MONGODB_URI');
