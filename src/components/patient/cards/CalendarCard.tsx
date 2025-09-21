@@ -76,7 +76,7 @@ export default function CalendarCard() {
   const header = headerLocal(today);
 
   return (
-    <div className="rounded-2xl bg-white p-5 shadow-sm">
+    <div className="rounded-2xl bg-gray-100 p-5 shadow-xl">
       {/* suppressHydrationWarning avoids noisy console if extensions tweak DOM */}
       <div className="mb-3 text-sm text-slate-600" suppressHydrationWarning>
         {mounted ? header : ''}
@@ -89,23 +89,23 @@ export default function CalendarCard() {
           const hasLogin = loginSet.has(key);
           
           // Determine the background color based on activity
-          let bgClass = 'border-slate-200 bg-white';
+          let bgClass = 'border-slate-900 bg-slate-900 text-white';
           if (hasLogin && streak) {
             // Both login and medication taken
-            bgClass = 'border-emerald-600 bg-emerald-100';
+            bgClass = 'border-emerald-600 bg-emerald-100 text-slate-900';
           } else if (hasLogin) {
             // Only login activity
-            bgClass = 'border-green-600 bg-green-50';
+            bgClass = 'border-green-600 bg-green-50 text-slate-900';
           } else if (streak) {
             // Only medication streak
-            bgClass = 'border-blue-600 bg-blue-50';
+            bgClass = 'border-blue-600 bg-blue-50 text-slate-900';
           }
           
           return (
             <div
               key={i}
-              className={`aspect-square rounded-md border text-center text-sm leading-[2.5rem] ${bgClass} ${
-                appt ? 'ring-2 ring-slate-900' : ''
+              className={`aspect-square rounded-full border text-center text-sm leading-[2.5rem] ${bgClass} ${
+                appt ? 'ring-2 ring-yellow-400' : ''
               }`}
             >
               {d.getDate()}
@@ -115,16 +115,19 @@ export default function CalendarCard() {
       </div>
       <div className="mt-3 flex gap-4 text-xs text-slate-600">
         <span className="inline-flex items-center gap-1">
-          <span className="h-3 w-3 rounded border border-green-600 bg-green-50"></span> Login Activity
+          <span className="h-3 w-3 rounded-full border border-slate-900 bg-slate-900"></span> Default
         </span>
         <span className="inline-flex items-center gap-1">
-          <span className="h-3 w-3 rounded border border-blue-600 bg-blue-50"></span> Medication
+          <span className="h-3 w-3 rounded-full border border-green-600 bg-green-50"></span> Login Activity
         </span>
         <span className="inline-flex items-center gap-1">
-          <span className="h-3 w-3 rounded border border-emerald-600 bg-emerald-100"></span> Both
+          <span className="h-3 w-3 rounded-full border border-blue-600 bg-blue-50"></span> Medication
         </span>
         <span className="inline-flex items-center gap-1">
-          <span className="h-3 w-3 rounded border border-slate-900 ring-2 ring-slate-900"></span> Appointments
+          <span className="h-3 w-3 rounded-full border border-emerald-600 bg-emerald-100"></span> Both
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span className="h-3 w-3 rounded-full border border-slate-900 ring-2 ring-yellow-400"></span> Appointments
         </span>
       </div>
     </div>

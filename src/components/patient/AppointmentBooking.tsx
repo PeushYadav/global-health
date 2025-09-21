@@ -129,7 +129,7 @@ export default function AppointmentBooking({ onSuccess }: AppointmentBookingProp
               onChange={(e) => setSelectedDate(e.target.value)}
               min={minDate}
               max={maxDate}
-              className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               required
             />
           </div>
@@ -141,7 +141,7 @@ export default function AppointmentBooking({ onSuccess }: AppointmentBookingProp
             <select
               value={selectedTime}
               onChange={(e) => setSelectedTime(e.target.value)}
-              className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               required
             >
               <option value="">Select time</option>
@@ -163,7 +163,7 @@ export default function AppointmentBooking({ onSuccess }: AppointmentBookingProp
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="e.g., Follow-up, Check-up, Lab results"
-            className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-xs text-slate-900 placeholder:text-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             required
           />
         </div>
@@ -177,7 +177,7 @@ export default function AppointmentBooking({ onSuccess }: AppointmentBookingProp
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             placeholder="Medical Center"
-            className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-xs focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-xs text-slate-900 placeholder:text-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           />
         </div>
 

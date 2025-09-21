@@ -128,7 +128,7 @@ export default function DashboardDemo() {
                     return (
                       <div
                         key={i}
-                        className={`aspect-square rounded-md border text-center text-sm leading-[2.5rem] ${streak ? 'border-green-600 bg-green-50' : 'border-slate-200'} ${appt ? 'ring-2 ring-slate-900' : ''}`}
+                        className={`aspect-square rounded-full border text-center text-sm leading-[2.5rem] ${streak ? 'border-green-600 bg-green-50 text-slate-900' : 'border-slate-900 bg-slate-900 text-white'} ${appt ? 'ring-2 ring-yellow-400' : ''}`}
                       >
                         {d.getDate()}
                       </div>
@@ -137,10 +137,13 @@ export default function DashboardDemo() {
                 </div>
                 <div className="mt-3 flex gap-4 text-xs text-slate-600">
                   <span className="inline-flex items-center gap-1">
-                    <span className="h-3 w-3 rounded border border-green-600 bg-green-50"></span> Your Streak
+                    <span className="h-3 w-3 rounded-full border border-slate-900 bg-slate-900"></span> Default
                   </span>
                   <span className="inline-flex items-center gap-1">
-                    <span className="h-3 w-3 rounded border border-slate-900 ring-2 ring-slate-900"></span> Appointments
+                    <span className="h-3 w-3 rounded-full border border-green-600 bg-green-50"></span> Your Streak
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <span className="h-3 w-3 rounded-full border border-slate-900 ring-2 ring-yellow-400"></span> Appointments
                   </span>
                 </div>
               </div>

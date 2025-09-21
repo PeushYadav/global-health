@@ -88,7 +88,7 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json();
-    const { id, action } = body;
+    const { id, action, newTime } = body;
 
     if (!id || !action) {
       return NextResponse.json({ error: 'Missing appointment ID or action' }, { status: 400 });
@@ -99,17 +99,36 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Appointment not found' }, { status: 404 });
     }
 
-    // Update appointment status based on action
-    let newStatus = 'upcoming';
+    // Handle different actions
+    let updateFields: any = {};
+    
     if (action === 'accept') {
-      newStatus = 'upcoming';
+      updateFields.status = 'upcoming';
     } else if (action === 'decline') {
-      newStatus = 'cancelled';
+      updateFields.status = 'cancelled';
+    } else if (action === 'reschedule') {
+      if (!newTime) {
+        return NextResponse.json({ error: 'New time required for reschedule' }, { status: 400 });
+      }
+      
+      // Validate new time is in the future
+      const newDateTime = new Date(newTime);
+      if (newDateTime <= new Date()) {
+        return NextResponse.json({ error: 'New appointment time must be in the future' }, { status: 400 });
+      }
+      
+      updateFields.when = newDateTime;
+      updateFields.status = 'upcoming';
+    } else {
+      return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
 
-    await Appointment.findByIdAndUpdate(id, { status: newStatus });
+    await Appointment.findByIdAndUpdate(id, updateFields);
 
-    return NextResponse.json({ message: 'Appointment updated successfully' });
+    return NextResponse.json({ 
+      message: `Appointment ${action}${action === 'reschedule' ? 'd' : action === 'accept' ? 'ed' : 'd'} successfully` 
+    });
+    
   } catch (error) {
     console.error('Error updating appointment:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
