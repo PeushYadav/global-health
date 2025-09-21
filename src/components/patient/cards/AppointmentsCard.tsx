@@ -1,6 +1,7 @@
 // components/patient/cards/AppointmentsCard.tsx
 'use client';
 import { useEffect, useState } from 'react';
+import { CompactVideoCallButton } from '../../VideoCallButton';
 
 export default function AppointmentsCard() {
   const [items,setItems]=useState<any[]>([]);
@@ -22,11 +23,11 @@ export default function AppointmentsCard() {
     const r=await fetch('/api/patient/appointments', { cache: 'no-store' });
     if(r.ok) {
       const appointments = await r.json();
-      // Filter upcoming appointments and sort by date
-      const upcomingAppointments = appointments
-        .filter((a: any) => a.status === 'upcoming' && new Date(a.when) > new Date())
+      // Get both upcoming and confirmed appointments
+      const relevantAppointments = appointments
+        .filter((a: any) => (a.status === 'upcoming' || a.status === 'confirmed') && new Date(a.when) > new Date())
         .sort((a: any, b: any) => new Date(a.when).getTime() - new Date(b.when).getTime());
-      setItems(upcomingAppointments);
+      setItems(relevantAppointments);
     }
   })();},[refreshKey]);
   return (
@@ -48,8 +49,20 @@ export default function AppointmentsCard() {
                   {a.location && <div className="text-xs text-slate-600">{a.location}</div>}
                   {a.reason && <div className="text-xs text-slate-600 mt-0.5 italic">{a.reason}</div>}
                 </div>
-                <div className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-                  {a.status}
+                <div className="flex flex-col gap-2 items-end">
+                  <div className={`text-xs px-2 py-1 rounded-full ${
+                    a.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                  }`}>
+                    {a.status}
+                  </div>
+                  {a.status === 'confirmed' && (
+                    <CompactVideoCallButton
+                      appointmentId={a.id}
+                      participantName={a.doctorName}
+                      disabled={false}
+                      userRole="patient"
+                    />
+                  )}
                 </div>
               </div>
             </li>

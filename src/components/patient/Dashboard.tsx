@@ -9,6 +9,7 @@ import AIChatCard from './cards/AIChatCard';
 import TodayMedsCard from './cards/TodayMedsCard';
 import MedicationStreakCard from './cards/MedicationStreakCard';
 import LeaderboardCard from './cards/LeaderboardCard';
+import PatientCallJoin from './cards/PatientCallJoin';
 
 export default function Dashboard({
   userId, userEmail, firstName, hasProfile
@@ -29,6 +30,7 @@ export default function Dashboard({
           </div>
 
           <div className="md:col-span-4 grid gap-6">
+            <PatientCallJoin />
             <MedicationStreakCard />
             <TodayMedsCard />
             <LeaderboardCard />

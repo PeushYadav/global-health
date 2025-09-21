@@ -1,6 +1,7 @@
 // components/doctor/AppointmentsPanel.tsx
 'use client';
 import { useEffect, useState } from 'react';
+import { LargeVideoCallButton, CompactVideoCallButton } from '../VideoCallButton';
 
 interface Appointment {
   id: string;
@@ -221,10 +222,19 @@ export default function AppointmentsPanel() {
                         )}
                       </div>
                       
-                      <div className="flex flex-col gap-1">
+                      <div className="flex flex-col gap-2">
                         <div className="text-xs px-3 py-1 bg-green-100 text-green-800 rounded-full text-center font-medium">
                           Confirmed
                         </div>
+                        
+                        {/* Video Call Button */}
+                        <CompactVideoCallButton
+                          appointmentId={appointment.id}
+                          participantName={appointment.patient?.name}
+                          disabled={false}
+                          userRole="doctor"
+                        />
+                        
                         <button
                           onClick={() => handleAppointmentAction(appointment.id, 'decline')}
                           className="text-xs px-2 py-1 bg-red-100 text-red-800 rounded-full hover:bg-red-200 transition-colors"
