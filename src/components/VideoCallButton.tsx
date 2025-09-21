@@ -6,52 +6,58 @@ import { useRouter } from 'next/navigation';
 
 interface VideoCallButtonProps {
   appointmentId?: string;
-  participantId?: string;
   participantName?: string;
   appointmentReason?: string;
   isAppointment?: boolean;
   disabled?: boolean;
   className?: string;
-  userRole?: 'doctor' | 'patient';
+  userRole: 'doctor' | 'patient';
 }
+
+/**
+ * Generates a unique room ID for video calls
+ */
+const generateRoomId = (appointmentId?: string): string => {
+  if (appointmentId) {
+    return `appointment_${appointmentId}_${Date.now()}`;
+  }
+  return `call_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+};
+
+/**
+ * Gets the appropriate call route based on user role
+ */
+const getCallRoute = (userRole: 'doctor' | 'patient', roomId: string): string => {
+  return `/${userRole}/call?roomId=${roomId}`;
+};
 
 export default function VideoCallButton({
   appointmentId,
-  participantId,
   participantName,
   appointmentReason,
   isAppointment = false,
   disabled = false,
   className = '',
-  userRole = 'doctor'
+  userRole
 }: VideoCallButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
 
-  const initiateCall = async () => {
-    if (disabled) return;
+  const initiateCall = () => {
+    if (disabled || isLoading) return;
     
     setIsLoading(true);
     setError('');
 
     try {
-      // Generate a simple room ID based on appointment or timestamp
-      const roomId = appointmentId 
-        ? `appointment_${appointmentId}_${Date.now()}` 
-        : `call_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-      // Navigate to role-specific call page
-      const callRoute = userRole === 'doctor' 
-        ? `/doctor/call?roomId=${roomId}` 
-        : `/patient/call?roomId=${roomId}`;
+      const roomId = generateRoomId(appointmentId);
+      const callRoute = getCallRoute(userRole, roomId);
       
       router.push(callRoute);
-      
     } catch (err) {
       setError('Failed to start video call');
       console.error('Video call error:', err);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -117,15 +123,13 @@ export default function VideoCallButton({
 // Compact version for use in lists/tables
 export function CompactVideoCallButton({
   appointmentId,
-  participantId,
   participantName,
   disabled = false,
-  userRole = 'doctor'
+  userRole
 }: Omit<VideoCallButtonProps, 'className' | 'isAppointment' | 'appointmentReason'>) {
   return (
     <VideoCallButton
       appointmentId={appointmentId}
-      participantId={participantId}
       participantName={participantName}
       disabled={disabled}
       userRole={userRole}
@@ -140,8 +144,8 @@ export function LargeVideoCallButton({
   participantName,
   appointmentReason,
   disabled = false,
-  userRole = 'doctor'
-}: Omit<VideoCallButtonProps, 'className' | 'participantId'>) {
+  userRole
+}: Omit<VideoCallButtonProps, 'className'>) {
   return (
     <VideoCallButton
       appointmentId={appointmentId}

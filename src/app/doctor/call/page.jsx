@@ -1,3 +1,13 @@
+/**
+ * Doctor Video Call Page
+ * 
+ * Provides video calling interface for doctors with:
+ * - WebRTC peer-to-peer video/audio
+ * - Real-time text chat via DataChannel
+ * - Professional doctor-themed UI
+ * - Connection status indicators
+ */
+
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -17,16 +27,19 @@ export default function DoctorVideoCall() {
   const searchParams = useSearchParams();
   const roomId = searchParams.get('roomId') || searchParams.get('id') || `doctor_call_${Date.now()}`;
   
-  // States
+  // Connection and call states
   const [isConnected, setIsConnected] = useState(false);
   const [isCallActive, setIsCallActive] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [messageInput, setMessageInput] = useState('');
   const [connectionStatus, setConnectionStatus] = useState('Connecting...');
-  const [participantName, setParticipantName] = useState('Patient');
+  const [error, setError] = useState('');
+  
+  // Media controls
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
-  const [error, setError] = useState('');
+  
+  // Chat functionality  
+  const [messages, setMessages] = useState([]);
+  const [messageInput, setMessageInput] = useState('');
 
   // Refs
   const localVideoRef = useRef(null);
@@ -53,7 +66,11 @@ export default function DoctorVideoCall() {
 
       // Connect to signaling server
       socketRef.current = io('http://localhost:4000', {
-        transports: ['websocket']
+        transports: ['websocket', 'polling'], // Fallback to polling if websocket fails
+        timeout: 5000,
+        reconnection: true,
+        reconnectionAttempts: 3,
+        reconnectionDelay: 1000
       });
 
       socketRef.current.on('connect', () => {
@@ -79,7 +96,12 @@ export default function DoctorVideoCall() {
 
       socketRef.current.on('connect_error', (error) => {
         console.error('Socket connection error:', error);
-        setError('Failed to connect to signaling server');
+        setError('Unable to connect to video call server. Please check your internet connection.');
+        setConnectionStatus('Connection failed - Retrying...');
+      });
+
+      socketRef.current.on('reconnect_failed', () => {
+        setError('Failed to connect to video call server. Please try again later.');
         setConnectionStatus('Connection failed');
       });
 
@@ -269,7 +291,12 @@ export default function DoctorVideoCall() {
     }
   };
 
-  // End call
+  // Retry connection
+  const retryConnection = () => {
+    setError('');
+    setConnectionStatus('Reconnecting...');
+    initializeCall();
+  };
   const endCall = () => {
     // Stop local stream
     if (localStreamRef.current) {
@@ -342,8 +369,14 @@ export default function DoctorVideoCall() {
       </div>
 
       {error && (
-        <div className="bg-red-600 text-white p-4 text-center">
-          {error}
+        <div className="bg-red-600 text-white p-4 text-center flex justify-between items-center">
+          <span>{error}</span>
+          <button 
+            onClick={retryConnection}
+            className="bg-red-700 hover:bg-red-800 px-3 py-1 rounded text-sm transition-colors"
+          >
+            Retry
+          </button>
         </div>
       )}
 
