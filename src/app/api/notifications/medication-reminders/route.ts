@@ -1,100 +1,138 @@
 // app/api/notifications/medication-reminders/route.ts
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { User } from '@/models/User';
 import { MedicalProfile } from '@/models/MedicalProfile';
-import { sendEmail, emailTemplates } from '@/lib/email';
+import { sendMedicationReminder, sendDailyMedicationReminders } from '@/lib/emailjs';
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
     await connectDB();
+
+    const { patientId, medicationName } = await request.json();
     
-    // Get all patients with medical profiles
-    const patients = await User.find({ role: 'patient' }).select('_id name email').lean();
-    const sentEmails = [];
-    const errors = [];
+    // If specific patient and medication provided, send targeted reminder
+    if (patientId && medicationName) {
+      const patient = await User.findById(patientId);
+      const medicalProfile = await MedicalProfile.findOne({ user: patientId });
+      
+      if (!patient || !medicalProfile) {
+        return NextResponse.json(
+          { error: 'Patient or medical profile not found' },
+          { status: 404 }
+        );
+      }
 
-    for (const patient of patients) {
-      try {
-        // Get patient's medical profile with medications
-        const profileData = await MedicalProfile.findOne({ user: patient._id }).lean();
-        const profile = profileData as any; // Type assertion for lean query
+      const medication = medicalProfile.medications?.find(
+        (med: any) => med.name.toLowerCase().includes(medicationName.toLowerCase())
+      );
+
+      if (!medication) {
+        return NextResponse.json(
+          { error: 'Medication not found' },
+          { status: 404 }
+        );
+      }
+
+      const result = await sendMedicationReminder({
+        userName: patient.name,
+        email: patient.email,
+        medicineName: medication.name,
+        dosage: medication.dosage,
+        time: medication.timing
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: 'Medication reminder sent',
+        patient: patient.name,
+        medication: medication.name,
+        result
+      });
+    }
+
+    // Send reminders to all patients with pending medications
+    const medicalProfiles = await MedicalProfile.find({
+      'medications.0': { $exists: true }
+    }).populate('user');
+
+    const results = [];
+    const currentHour = new Date().getHours();
+
+    for (const profile of medicalProfiles) {
+      const patient = profile.user as any;
+      
+      if (!patient || !patient.email) continue;
+
+      // Check if patient has medications due around this time
+      const dueMedications = profile.medications?.filter((med: any) => {
+        if (!med.timing) return false;
         
-        if (!profile || !profile.medications || profile.medications.length === 0) {
-          continue; // Skip patients without medications
+        // Parse timing (e.g., "8:00 AM", "Morning", "2x daily")
+        const timing = med.timing.toLowerCase();
+        
+        if (timing.includes('morning') || timing.includes('8:00') || timing.includes('9:00')) {
+          return currentHour >= 7 && currentHour <= 10;
         }
+        if (timing.includes('afternoon') || timing.includes('12:00') || timing.includes('1:00') || timing.includes('2:00')) {
+          return currentHour >= 11 && currentHour <= 14;
+        }
+        if (timing.includes('evening') || timing.includes('6:00') || timing.includes('7:00') || timing.includes('8:00')) {
+          return currentHour >= 17 && currentHour <= 20;
+        }
+        if (timing.includes('night') || timing.includes('10:00') || timing.includes('11:00')) {
+          return currentHour >= 21 || currentHour <= 1;
+        }
+        
+        return false;
+      }) || [];
 
-        // Prepare medication data
-        const medications = profile.medications.map((med: any) => ({
+      if (dueMedications.length > 0) {
+        // Send all due medications in batch for this patient
+        const medicationData = dueMedications.map((med: any) => ({
           name: med.name,
           dosage: med.dosage,
           timing: med.timing
         }));
 
-        // Generate email template
-        const emailContent = emailTemplates.medicationReminder(
-          patient.name || patient.email.split('@')[0],
-          medications
-        );
-
-        // Send email
-        const result = await sendEmail({
-          to: patient.email,
-          subject: emailContent.subject,
-          html: emailContent.html
-        });
-
-        if (result.success) {
-          sentEmails.push({
-            patientId: patient._id,
+        try {
+          const batchResults = await sendDailyMedicationReminders({
+            userName: patient.name,
             email: patient.email,
-            messageId: result.messageId
+            medications: medicationData
           });
-        } else {
-          errors.push({
-            patientId: patient._id,
+
+          results.push({
+            patient: patient.name,
             email: patient.email,
-            error: result.error
+            medicationsCount: dueMedications.length,
+            status: 'sent',
+            results: batchResults
+          });
+        } catch (error) {
+          results.push({
+            patient: patient.name,
+            email: patient.email,
+            medicationsCount: dueMedications.length,
+            status: 'failed',
+            error: error instanceof Error ? error.message : 'Unknown error'
           });
         }
-      } catch (error) {
-        errors.push({
-          patientId: patient._id,
-          email: patient.email,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: `Medication reminders processed`,
-      stats: {
-        total: patients.length,
-        sent: sentEmails.length,
-        errors: errors.length
-      },
-      sentEmails,
-      errors
+      message: `Processed medication reminders for ${results.length} patients`,
+      currentHour,
+      results
     });
 
   } catch (error) {
-    console.error('Medication reminder cron job failed:', error);
+    console.error('Medication reminders error:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: error instanceof Error ? error.message : 'Unknown error' 
-      },
+      { error: 'Failed to send medication reminders', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
-}
-
-// Manual trigger endpoint for testing
-export async function GET() {
-  return NextResponse.json({
-    message: 'Medication reminder service is active',
-    endpoint: 'POST /api/notifications/medication-reminders',
-    description: 'Sends daily medication reminders to all patients with prescribed medications'
-  });
 }

@@ -5,7 +5,7 @@ import { User } from '@/models/User';
 import { MedicalProfile } from '@/models/MedicalProfile';
 import { DailyLog } from '@/models/DailyLog';
 import { Appointment } from '@/models/Appointment';
-import { sendEmail, emailTemplates } from '@/lib/email';
+import { sendNotificationEmail } from '@/lib/emailjs';
 import { ymdLocal } from '@/utils/date';
 
 // Helper function to get doctor's patients and their adherence data
@@ -154,17 +154,26 @@ export async function POST() {
           continue; // Skip if all patients are doing well
         }
 
-        // Generate email template
-        const emailContent = emailTemplates.doctorPatientAlert(
-          reportData.doctor.name || 'Doctor',
-          reportData.patientReports
-        );
+        // Generate doctor alert message
+        const criticalPatients = patientsNeedingAttention.filter(p => p.status === 'critical').length;
+        const warningPatients = patientsNeedingAttention.filter(p => p.status === 'warning').length;
+        
+        const subject = `Patient Adherence Alert - ${criticalPatients} Critical, ${warningPatients} Warning`;
+        
+        // Create a summary of patients needing attention
+        const patientSummary = patientsNeedingAttention.map(patient => 
+          `${patient.name}: ${patient.adherenceRate}% adherence (${patient.status})`
+        ).join(', ');
+        
+        const message = `Dear Dr. ${reportData.doctor.name || 'Doctor'}, you have ${patientsNeedingAttention.length} patients requiring attention: ${patientSummary}. Please review their medication adherence and consider follow-up consultations.`;
 
-        // Send email
-        const result = await sendEmail({
-          to: doctor.email,
-          subject: emailContent.subject,
-          html: emailContent.html
+        // Send email using EmailJS
+        const result = await sendNotificationEmail({
+          userName: reportData.doctor.name || 'Doctor',
+          email: doctor.email,
+          subject: subject,
+          message: message,
+          actionUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3003'}/doctor`
         });
 
         if (result.success) {

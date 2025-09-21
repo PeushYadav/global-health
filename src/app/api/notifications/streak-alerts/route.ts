@@ -4,7 +4,7 @@ import { connectDB } from '@/lib/db';
 import { User } from '@/models/User';
 import { MedicalProfile } from '@/models/MedicalProfile';
 import { DailyLog } from '@/models/DailyLog';
-import { sendEmail, emailTemplates } from '@/lib/email';
+import { sendNotificationEmail } from '@/lib/emailjs';
 import { ymdLocal } from '@/utils/date';
 
 // Helper function to calculate medication streak
@@ -88,18 +88,23 @@ export async function POST() {
           continue; // Skip patients who don't need alerts
         }
 
-        // Generate email template
-        const emailContent = emailTemplates.streakMilestone(
-          patient.name || patient.email.split('@')[0],
-          streakData.streakDays,
-          streakData.isBreaking
-        );
+        let subject, message;
+        
+        if (streakData.isBreaking) {
+          subject = "Don't Give Up - Your Health Journey Matters! 💪";
+          message = `Hi ${patient.name || 'there'}! We noticed you might be having trouble with your medication routine. Your current adherence is ${streakData.adherenceRate}%. Remember, every day is a new opportunity to take care of your health. We're here to support you!`;
+        } else {
+          subject = `Congratulations! ${streakData.streakDays}-Day Streak Achieved! 🎉`;
+          message = `Amazing work ${patient.name || 'there'}! You've successfully maintained your medication routine for ${streakData.streakDays} days straight. Your adherence rate is ${streakData.adherenceRate}%. Keep up the fantastic progress!`;
+        }
 
-        // Send email
-        const result = await sendEmail({
-          to: patient.email,
-          subject: emailContent.subject,
-          html: emailContent.html
+        // Send email using EmailJS
+        const result = await sendNotificationEmail({
+          userName: patient.name || patient.email.split('@')[0],
+          email: patient.email,
+          subject: subject,
+          message: message,
+          actionUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3003'}/patient`
         });
 
         if (result.success) {
@@ -108,7 +113,8 @@ export async function POST() {
             email: patient.email,
             messageId: result.messageId,
             alertType: streakData.isBreaking ? 'streak_breaking' : 'milestone',
-            streakDays: streakData.streakDays
+            streakDays: streakData.streakDays,
+            adherenceRate: streakData.adherenceRate
           });
         } else {
           errors.push({
